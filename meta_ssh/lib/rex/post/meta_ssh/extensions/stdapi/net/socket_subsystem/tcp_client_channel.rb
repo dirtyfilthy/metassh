@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'thread'
-require 'rex/post/ssh/channel'
+require 'rex/post/meta_ssh/channel'
 require 'rex/io/stream'
 require 'rex/socket/tcp'
 require 'rex/post/meta_ssh/extensions/stdapi/net/socket_subsystem/forward_mixin'

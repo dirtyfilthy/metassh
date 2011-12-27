@@ -62,7 +62,6 @@ class TcpServerChannel
 				result = nil
 			end
 		end
-    puts "accept result #{result.inspect}"
 		return result
 	end
 

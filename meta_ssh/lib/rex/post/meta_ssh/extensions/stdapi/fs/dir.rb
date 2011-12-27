@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'rex/post/dir'
-require 'rex/post/ssh/extensions/stdapi/stdapi'
+require 'rex/post/meta_ssh/extensions/stdapi/stdapi'
 
 module Rex
 module Post
