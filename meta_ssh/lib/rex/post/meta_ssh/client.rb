@@ -6,6 +6,7 @@ require 'rex/post/meta_ssh/channel'
 require 'rex/post/meta_ssh/client_core'
 require 'rex/post/meta_ssh/object_aliases'
 require 'rex/script'
+require 'rex/script/meta_ssh'
 require 'rex/logging'
 
 module Rex
@@ -20,10 +21,10 @@ end
 
 ###
 #
-# This class represents a logical meterpreter client class.  This class
+# This class represents a logical metaSSH client class.  This class
 # provides an interface that is compatible with the Rex post-exploitation
 # interface in terms of the feature set that it attempts to expose.  This
-# class is meant to drive a single meterpreter client session.
+# class is meant to drive a single metaSSH client session.
 #
 ###
 class Client
@@ -74,7 +75,6 @@ class Client
 	# Cleans up the meterpreter instance, terminating the dispatcher thread.
 	#
 	def cleanup_ssh
-    puts "klean up"
     self.fs.sftp.cleanup unless self.fs.nil? or self.fs.sftp.nil?
     ext.aliases.each_value do | extension |
 			extension.cleanup if extension.respond_to?( 'cleanup' )
@@ -314,15 +314,7 @@ class Client
 	#
 	# The Communication Timeout
 	#
-	attr_accessor :comm_timeout
-	#
-	# The Passive Dispatcher
-	#
-	attr_accessor :passive_dispatcher
-	#
-	# Flag indicating whether to hex-encode UTF-8 file names and other strings
-	#
-	attr_accessor :encode_unicode
+  attr_accessor :comm_timeout
 
 protected
 	attr_accessor :parser, :ext_aliases # :nodoc:

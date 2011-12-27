@@ -42,6 +42,8 @@ public
     return out
   end
 
+  alias :execute :exec
+
 protected
 
 	attr_accessor :client # :nodoc:

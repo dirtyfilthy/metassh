@@ -165,7 +165,6 @@ class File < Rex::Post::IO
 	def initialize(name, mode = "r", perms = nil)
     self.client = self.class.client
 		self.filed  = _open(name, mode, perms)
-    STDOUT.puts "file created class #{self.filed.class.name}"
 	end
 
 	##

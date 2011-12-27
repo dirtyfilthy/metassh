@@ -1,6 +1,9 @@
 require 'rex/post/meta_ssh'
-
+require 'msf/scripts/meta_ssh'
+require 'msf/scripts/meta_ssh/common'
+require 'msf/scripts/meta_ssh/file'
 require 'rex/parser/arguments'
+require 'msf/base/simple/post'
 
 module Rex
 module Post
@@ -261,7 +264,13 @@ class Console::CommandDispatcher::Core
 					return
 				end
 				opts = (args + [ "SESSION=#{client.sid}" ]).join(',')
-				mod.run_simple(
+        
+        # monkeypatch the mod to use our cmd_exec etc
+        
+        mod=mod.dup
+        mod.extend(Msf::Scripts::MetaSSH::Common)
+				mod.extend(Msf::Simple::Post)
+        mod.run_simple(
 					#'RunAsJob' => true,
 					'LocalInput'  => shell.input,
 					'LocalOutput' => shell.output,
