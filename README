@@ -167,6 +167,36 @@ Copy meta_ssh.rb & the meta_ssh directory to your metasploit plugins directory
 Usage
 -----
 
-After installation in msfconsole run "load meta\_ssh" to load the plugin. Two new exploit modules and one new payload module will become available. The exploits "exploits/multi/ssh/login_password" & "exploits/multi/ssh/pubkey" both let you login to an ssh server through different means and are fairly self explanatory. The payload for each of these must be "payloads/singles/ssh/metassh_session" which will spawn metaSSH.  
-    
+After installation in msfconsole run "load meta\_ssh" to load the plugin. Two new exploit modules and one new payload module will become available. The exploits "multi/ssh/login_password" & "multi/ssh/login_pubkey" both let you login to an ssh server through different means and are fairly self explanatory. The payload for each of these must be "ssh/metassh_session" which will spawn metaSSH. 
 
+### Pivoting
+
+To get pivoting to work just add a route to your internal subnet through your metaSSH session like so:
+
+    msf > route add 192.168.57.0 255.255.255.0 1
+
+NOTE: For reverse pivoting GatewayPorts MUST be set to yes in sshd_config on your pivot box. At some point I'll probably add an emulation mode with mkfifo & netcat.
+
+### Post-exploitation modules
+
+To use run them from the metaSSH session just like meterpreter
+
+    metaSSH > run post/linux/gather/checkvm
+    
+    [*] Gathering System info ....
+    [+] This appears to be a VirtualBox Virtual Machine
+
+Bugs
+----
+
+Forwarded ports (local and remote) are never released until the metaSSH session ends. For some reason I couldn't figure out, attempting to cancel port forwarding also kills any popped sessions. Any other bugs please open an issue on my github ( https://github.com/dirtyfilthy/metassh ). Pull requests/fixes gratefully accepted.
+
+Acknowledgements
+----------------
+
+This code is based heavily on the meterpreter session code included with metasploit and has in many cases simply been "cargo culted" and altered.
+
+Author
+-----
+
+dirtyfilthy -- http://twitter.com/dirtyfilthy -- dirtyfilthee@gmail.com
