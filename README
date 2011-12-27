@@ -160,13 +160,13 @@ Get the latest version of metaSSH
 
     git clone git@github.com:dirtyfilthy/metassh.git
 
-Copy meta_ssh.rb & the meta\_ssh directory to your metasploit plugins directory
+Copy meta_ssh.rb & the meta_ssh directory to your metasploit plugins directory
 
     cp -r meta_ssh.rb meta_ssh ~/metasploit/plugins
 
 Usage
 -----
 
-After installation in msfconsole run "load meta\_ssh" to load the plugin. Two new exploit modules and one new payload module will become available. The exploits "exploits/multi/ssh/login\_password" & "exploits.multi/ssh/pubkey" both let you login to an ssh server through different means and are fairly self explanatory. The payload for each of these must be "payloads/singles/ssh/metassh_session" which will spawn metaSSH.  
+After installation in msfconsole run "load meta\_ssh" to load the plugin. Two new exploit modules and one new payload module will become available. The exploits "exploits/multi/ssh/login_password" & "exploits/multi/ssh/pubkey" both let you login to an ssh server through different means and are fairly self explanatory. The payload for each of these must be "payloads/singles/ssh/metassh_session" which will spawn metaSSH.  
     
 
