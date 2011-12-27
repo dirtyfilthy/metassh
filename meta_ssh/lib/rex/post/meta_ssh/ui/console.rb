@@ -25,7 +25,7 @@ class Console
 	# Initialize the meterpreter console.
 	#
 	def initialize(client)
-    super("ssh")
+    super("metaSSH")
 		# The meterpreter client context
 		self.client = client
 

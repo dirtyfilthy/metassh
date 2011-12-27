@@ -171,7 +171,7 @@ class File < Rex::Post::IO
         when Net::SFTP::Constants::StatusCodes::FX_NO_SUCH_FILE
           raise Errno::ENOENT
         when Net::SFTP::Constants::StatusCodes::FX_PERMISSION_DENIED
-          raise Errno::EACCES)
+          raise Errno::EACCES
         else
           raise e
       end

