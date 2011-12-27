@@ -7,6 +7,7 @@ require 'rex/post/meta_ssh/extensions/stdapi/fs/sftp'
 require 'rex/post/meta_ssh/extensions/stdapi/fs/file'
 require 'rex/post/meta_ssh/extensions/stdapi/fs/file_stat'
 require 'rex/post/meta_ssh/extensions/stdapi/fs/dir'
+require 'rex/post/meta_ssh/extensions/stdapi/sys'
 
 module Rex
 module Post
@@ -47,10 +48,14 @@ class Stdapi < Extension
 						{
 							'sftp'      => Rex::Post::MetaSSH::Extensions::Stdapi::Fs::Sftp.new(client),
               'file'      => self.file,
-              'filestat' => self.file_stat,
+              'filestat'  => self.file_stat,
               'dir'       => self.dir
 						})
-				}
+				},
+
+        { 'name' => 'sys',
+          'ext'  => Rex::Post::MetaSSH::Extensions::Stdapi::Sys.new(client)
+        },
 
 			])
 	end

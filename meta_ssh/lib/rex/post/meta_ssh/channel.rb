@@ -20,7 +20,7 @@ class Channel
 
 
 
-	attr_accessor :channel, :thread, :error, :ssh, :on_exit_signal, :on_exit_status
+	attr_accessor :channel, :thread, :error, :ssh, :on_exit_signal, :on_exit_status, :type, :info
 	attr_accessor :lsock, :rsock, :cid, :client, :monitor
 
 	module PeerInfo
@@ -35,7 +35,9 @@ class Channel
 		self.lsock.extend(Rex::IO::Stream)
 		self.lsock.extend(PeerInfo)
 		self.rsock.extend(Rex::IO::Stream)
-		self.client=client
+		self.type=""
+    self.info=""
+    self.client=client
     self.client.add_channel(self)
     self.thread = Thread.new(client.ssh, cleanup) do |rssh,rcleanup|
 
@@ -127,6 +129,7 @@ class Channel
 
   def close
     begin
+      self.client.remove_channel(self)
       self.monitor.kill if self.monitor
       self.thread.kill if self.thread
       self.channel.close

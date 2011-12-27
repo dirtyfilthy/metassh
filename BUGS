@@ -1,0 +1,1 @@
+* Ports must remain forwarded by the ssh client until metaSSH session closes, removing the forwarded ports kills pivoted sessions

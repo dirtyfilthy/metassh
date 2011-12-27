@@ -44,23 +44,15 @@ class Console::CommandDispatcher::Core
 			"close"      => "Closes a channel",
 			"channel"    => "Displays information about active channels",
 			"exit"       => "Terminate the ssh session",
-			"detach"     => "Detach the meterpreter session (for http/https)",
 			"help"       => "Help menu",
 			"interact"   => "Interacts with a channel",
 			"irb"        => "Drop into irb scripting mode",
-			"migrate"    => "Migrate the server to another process",
 			"use"        => "Deprecated alias for 'load'",
-			"load"       => "Load one or more meterpreter extensions",
-			"quit"       => "Terminate the meterpreter session",
-			"resource"   => "Run the commands stored in a file",
-			"read"       => "Reads data from a channel",
-			"run"        => "Executes a meterpreter script or Post module",
-			"bgrun"      => "Executes a meterpreter script as a background thread",
-			"bgkill"     => "Kills a background meterpreter script",
+			"quit"       => "Terminate the ssh session",
+			"run"        => "Executes a metaSSH script or Post module",
+			"bgrun"      => "Executes a metaSSH script as a background thread",
+			"bgkill"     => "Kills a background metaSSH script",
 			"bglist"     => "Lists running background scripts",
-			"write"      => "Writes data to a channel",
-			"enable_unicode_encoding"  => "Enables encoding of unicode strings",
-			"disable_unicode_encoding" => "Disables encoding of unicode strings"
 		}
 		if (msf_loaded?)
 			c["info"] = "Displays information about a Post module"
@@ -94,8 +86,6 @@ class Console::CommandDispatcher::Core
 		"-c" => [ true,  "Close the given channel." ],
 		"-i" => [ true,  "Interact with the given channel." ],
 		"-l" => [ false, "List active channels." ],
-		"-r" => [ true,  "Read from the given channel." ],
-		"-w" => [ true,  "Write to the given channel." ],
 		"-h" => [ false, "Help menu." ])
 
 	def cmd_channel_help
@@ -109,7 +99,7 @@ class Console::CommandDispatcher::Core
 	# Performs operations on the supplied channel.
 	#
 	def cmd_channel(*args)
-		if args.include?("-h") or args.include?("--help")
+		if args.include?("-h") or args.include?("--help") or args.length==0
 			cmd_channel_help
 			return
 		end
@@ -129,12 +119,6 @@ class Console::CommandDispatcher::Core
 			when "-i"
 				mode = :interact
 				chan = val
-			when "-r"
-				mode = :read
-				chan = val
-			when "-w"
-				mode = :write
-				chan = val
 			end
 			if @@channel_opts.arg_required?(opt)
 				unless chan
@@ -151,13 +135,13 @@ class Console::CommandDispatcher::Core
 				'Columns' =>
 					[
 						'Id',
-						'Class',
-						'Type'
+						'Type',
+						'Info'
 					])
 			items = 0
 
 			client.channels.each_pair { |cid, channel|
-				tbl << [ cid, channel.class.cls, channel.type ]
+				tbl << [ cid, channel.type, channel.info ]
 				items += 1
 			}
 
@@ -170,10 +154,6 @@ class Console::CommandDispatcher::Core
 			cmd_close(chan)
 		when :interact
 			cmd_interact(chan)
-		when :read
-			cmd_read(chan)
-		when :write
-			cmd_write(chan)
 		else
 			# No mode, no service.
 			return true
@@ -198,17 +178,17 @@ class Console::CommandDispatcher::Core
 			print_error("Invalid channel identifier specified.")
 			return true
 		else
-			channel._close # Issue #410
+			channel.close # Issue #410
 
 			print_status("Closed channel #{cid}.")
 		end
 	end
 
 	#
-	# Terminates the meterpreter session.
+	# Terminates the metaSSH session.
 	#
 	def cmd_exit(*args)
-		print_status("Shutting down ssh...")
+		print_status("Shutting down metaSSH...")
 		client.core.shutdown 
 		shell.stop
 	end
@@ -244,157 +224,16 @@ class Console::CommandDispatcher::Core
 	#
 	def cmd_irb(*args)
 		print_status("Starting IRB shell")
-		print_status("The 'client' variable holds the meterpreter client\n")
+		print_status("The 'client' variable holds the metaSSH client\n")
 
 		Rex::Ui::Text::IrbShell.new(binding).run
-	end
-
-	#
-	# Migrates the server to the supplied process identifier.
-	#
-	def cmd_migrate(*args)
-		if (args.length == 0)
-			print_line(
-				"Usage: migrate pid\n\n" +
-				"Migrates the server instance to another process.\n" +
-				"Note: Any open channels or other dynamic state will be lost.")
-			return true
-		end
-
-		pid = args[0].to_i
-		if(pid == 0)
-			print_error("A process ID must be specified, not a process name")
-			return
-		end
-
-		print_status("Migrating to #{pid}...")
-
-		# Do this thang.
-		client.core.migrate(pid)
-
-		print_status("Migration completed successfully.")
-	end
-
-	def cmd_load_help
-		print_line("Usage: load ext1 ext2 ext3 ...")
-		print_line
-		print_line "Loads a meterpreter extension module or modules."
-		print_line @@load_opts.usage
-	end
-
-	#
-	# Loads one or more meterpreter extensions.
-	#
-	def cmd_load(*args)
-		if (args.length == 0)
-			args.unshift("-h")
-		end
-
-		modules = nil
-
-		@@load_opts.parse(args) { |opt, idx, val|
-			case opt
-				when "-l"
-					exts = []
-					path = ::File.join(Msf::Config.install_root, 'data', 'meterpreter')
-					::Dir.entries(path).each { |f|
-						if (::File.file?(::File.join(path, f)) && f =~ /ext_server_(.*)\.#{client.binary_suffix}/ )
-							exts.push($1)
-						end
-					}
-					print(exts.sort.join("\n") + "\n")
-
-					return true
-				when "-h"
-					cmd_load_help
-					return true
-			end
-		}
-
-		# Load each of the modules
-		args.each { |m|
-			md = m.downcase
-
-			if (extensions.include?(md))
-				print_error("The '#{md}' extension has already been loaded.")
-				next
-			end
-
-			print("Loading extension #{md}...")
-
-			begin
-				# Use the remote side, then load the client-side
-				if (client.core.use(md) == true)
-					add_extension_client(md)
-				end
-			rescue
-				print_line
-				log_error("Failed to load extension: #{$!}")
-				next
-			end
-
-			print_line("success.")
-		}
-
-		return true
-	end
-
-	def cmd_load_tabs(str, words)
-		tabs = []
-		path = ::File.join(Msf::Config.install_root, 'data', 'meterpreter')
-		::Dir.entries(path).each { |f|
-			if (::File.file?(::File.join(path, f)) && f =~ /ext_server_(.*)\.#{client.binary_suffix}/ )
-				if (not extensions.include?($1))
-					tabs.push($1)
-				end
-			end
-		}
-		return tabs
-	end
-
-	def cmd_use(*args)
-		#print_error("Warning: The 'use' command is deprecated in favor of 'load'")
-		cmd_load(*args)
-	end
-	alias cmd_use_help cmd_load_help
-	alias cmd_use_tabs cmd_load_tabs
-
-	#
-	# Reads data from a channel.
-	#
-	def cmd_read(*args)
-		if (args.length == 0)
-			print_line(
-				"Usage: read channel_id [length]\n\n" +
-				"Reads data from the supplied channel.")
-			return true
-		end
-
-		cid     = args[0].to_i
-		length  = (args.length >= 2) ? args[1].to_i : 16384
-		channel = client.find_channel(cid)
-
-		if (!channel)
-			print_error("Channel #{cid} is not valid.")
-			return true
-		end
-
-		data = channel.read(length)
-
-		if (data and data.length)
-			print("Read #{data.length} bytes from #{cid}:\n\n#{data}\n")
-		else
-			print_error("No data was returned.")
-		end
-
-		return true
 	end
 
 	def cmd_run_help
 		print_line "Usage: run <script> [arguments]"
 		print_line
-		print_line "Executes a ruby script or Metasploit Post module in the context of the"
-		print_line "meterpreter session.  Post modules can take arguments in var=val format."
+		print_line "Executes a ruby script or metaSSH Post module in the context of the"
+		print_line "metaSSH session.  Post modules can take arguments in var=val format."
 		print_line "Example: run post/foo/bar BAZ=abcd"
 		print_line
 	end
@@ -447,7 +286,7 @@ class Console::CommandDispatcher::Core
 		if args.length == 0
 			print_line(
 				"Usage: bgrun <script> [arguments]\n\n" +
-				"Executes a ruby script in the context of the meterpreter session.")
+				"Executes a ruby script in the context of the metaSSH session.")
 			return true
 		end
 
@@ -469,7 +308,7 @@ class Console::CommandDispatcher::Core
 			print_status("Background script with Job ID #{myjid} has completed (#{::Thread.current[:args].inspect})")
 		end
 
-		print_status("Executed Meterpreter with Job ID #{jid}")
+		print_status("Executed metaSSH with Job ID #{jid}")
 	end
 
 	#
@@ -550,90 +389,6 @@ class Console::CommandDispatcher::Core
 		tab_complete_postmods
 	end
 
-	#
-	# Writes data to a channel.
-	#
-	@@write_opts = Rex::Parser::Arguments.new(
-		"-f" => [ true,  "Write the contents of a file on disk" ],
-		"-h" => [ false, "Help menu."                           ])
-
-	def cmd_write_help
-		print_line "Usage: write [options] channel_id"
-		print_line
-		print_line "Writes data to the supplied channel."
-		print_line @@write_opts.usage
-	end
-
-	def cmd_write(*args)
-		if (args.length == 0 or args.include?("-h"))
-			cmd_write_help
-			return
-		end
-
-		src_file = nil
-		cid      = nil
-
-		@@write_opts.parse(args) { |opt, idx, val|
-			case opt
-				when "-f"
-					src_file = val
-				else
-					cid = val.to_i
-			end
-		}
-
-		# Find the channel associated with this cid, assuming the cid is valid.
-		if ((!cid) or
-		    (!(channel = client.find_channel(cid))))
-			print_error("Invalid channel identifier specified.")
-			return true
-		end
-
-		# If they supplied a source file, read in its contents and write it to
-		# the channel
-		if (src_file)
-			begin
-				data = ''
-
-				::File.open(src_file, 'rb') { |f|
-					data = f.read(f.stat.size)
-				}
-
-			rescue Errno::ENOENT
-				print_error("Invalid source file specified: #{src_file}")
-				return true
-			end
-
-			if (data and data.length > 0)
-				channel.write(data)
-				print_status("Wrote #{data.length} bytes to channel #{cid}.")
-			else
-				print_error("No data to send from file #{src_file}")
-				return true
-			end
-		# Otherwise, read from the input descriptor until we're good to go.
-		else
-			print("Enter data followed by a '.' on an empty line:\n\n")
-
-			data = ''
-
-			# Keep truckin'
-			while (s = shell.input.gets)
-				break if (s =~ /^\.\r?\n?$/)
-				data += s
-			end
-
-			if (!data or data.length == 0)
-				print_error("No data to send.")
-			else
-				channel.write(data)
-				print_status("Wrote #{data.length} bytes to channel #{cid}.")
-			end
-		end
-
-		return true
-	end
-
 	def cmd_resource_tabs(str, words)
 		return [] if words.length > 1
 
@@ -673,16 +428,6 @@ class Console::CommandDispatcher::Core
 				end
 			end
 		end
-	end
-
-	def cmd_enable_unicode_encoding
-		client.encode_unicode = true
-		print_status("Unicode encoding is enabled")
-	end
-
-	def cmd_disable_unicode_encoding
-		client.encode_unicode = false
-		print_status("Unicode encoding is disabled")
 	end
 
 	@@client_extension_search_paths = [ ::File.join(Rex::Root, "post", "meterpreter", "ui", "console", "command_dispatcher") ]

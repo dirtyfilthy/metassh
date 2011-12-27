@@ -87,7 +87,15 @@ class Client
 
   def add_channel(c)
     c.cid=new_cid
-    self.channels << c
+    self.channels[c.cid.to_s]=c
+  end
+
+  def remove_channel(c)
+    self.channels.delete(c.cid.to_s)
+  end
+
+  def find_channel(c)
+    return self.channels[c.to_s]
   end
 
   def new_cid
@@ -102,7 +110,7 @@ class Client
 	def init_ssh(ssh,opts={})
     @cid_n=0
     self.ssh         = ssh
-    self.channels=[]
+    self.channels={}
 		self.expiration   = opts[:expiration]
 		self.comm_timeout = opts[:comm_timeout]
     self.ext          = ObjectAliases.new

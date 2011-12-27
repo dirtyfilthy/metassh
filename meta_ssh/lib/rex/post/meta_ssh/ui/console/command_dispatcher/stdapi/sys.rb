@@ -23,13 +23,7 @@ class Console::CommandDispatcher::Stdapi::Sys
 		"-c" => [ false, "Channelized I/O (required for interaction)."             ],
 		"-f" => [ true,  "The executable command to run."                          ],
 		"-h" => [ false, "Help menu."                                              ],
-		"-H" => [ false, "Create the process hidden from view."                    ],
-		"-i" => [ false, "Interact with the process after creating it."            ],
-		"-m" => [ false, "Execute from memory."                                    ],
-		"-d" => [ true,  "The 'dummy' executable to launch when using -m."         ],
-		"-t" => [ false, "Execute process with currently impersonated thread token"],
-		"-k" => [ false, "Execute process on the meterpreters current desktop"     ],
-		"-s" => [ true,  "Execute process in a given session as the session user"  ])
+		"-i" => [ false, "Interact with the process after creating it."            ])
 
 	#
 	# List of supported commands.
@@ -55,14 +49,10 @@ class Console::CommandDispatcher::Stdapi::Sys
 		if (args.length == 0)
 			args.unshift("-h")
 		end
-
+    channel     = nil
 		session     = nil
 		interact    = false
-		desktop     = false
 		channelized = nil
-		hidden      = nil
-		from_mem    = false
-		dummy_exec  = "cmd"
 		cmd_args    = nil
 		cmd_exec    = nil
 		use_thread_token = false
@@ -98,10 +88,14 @@ class Console::CommandDispatcher::Stdapi::Sys
 					session = val.to_i
 			end
 		}
-		
-    channel=Channel.new(client) {|c| c.channel.exec(cmd_exec)}
-    print_line("Channel #{channel.cid} created.") if channel
-
+	  if(channelized)	
+      channel=Channel.new(client) {|c| c.channel.exec(cmd_exec)}
+      channel.type="exec"
+      channel.info=cmd_exec
+      print_line("Channel #{channel.cid} created.") if channel
+    else
+      print_line(client.sys.exec(cmd_exec,cmd_args))
+    end
 		if (interact and channel)
 			shell.interact_with_channel(channel)
 		end
@@ -116,16 +110,6 @@ class Console::CommandDispatcher::Stdapi::Sys
 			cmd_execute("-f", path, "-c", "-i")
 	end
 
-
-	#
-	# Gets the process identifier that meterpreter is running in on the remote
-	# machine.
-	#
-	def cmd_getpid(*args)
-		print_line("Current pid: #{client.sys.process.getpid}")
-
-		return true
-	end
 end
 
 end
