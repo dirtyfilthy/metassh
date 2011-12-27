@@ -32,8 +32,7 @@ class TcpServerChannel
   end
 
   def stop
-    #client.ssh.forward.cancel_remote(self.params.localport,self.params.localhost)
-    #lsock.stop
+    # client.ssh.forward.cancel_remote(params.localport, params.localhost)
   end
 
   alias :close :stop

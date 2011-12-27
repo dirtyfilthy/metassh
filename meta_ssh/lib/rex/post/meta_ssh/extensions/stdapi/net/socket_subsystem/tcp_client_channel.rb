@@ -81,13 +81,7 @@ class TcpClientChannel
           server.after_accept do |listener,socket| 
             socket.extend(SocketAfterClose)
             socket.after_close do |s| 
-              
-              #begin 
               #client.ssh.forward.cancel_local(l_port,l_addr)
-              #rescue Exception => e
-              #puts e.to_s
-              #puts e.backtrace.join("\n")
-              #end
             end
           end
 			}
