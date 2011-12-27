@@ -44,15 +44,15 @@ class Sftp
     return path[0,1]==client.fs.file.separator
   end
 
-  def absolute_path(path)
+  def absolute_path(path,call_fx_realname=true)
     begin 
       if absolute_path?(path) 
-        return self.realpath!(path).name
+        return call_fx_realname ? self.realpath!(path).name : path
       else
         new_path=cwd
         new_path+=client.fs.file.separator unless cwd[-1,1]==client.fs.file.separator
         new_path+=path
-        return self.realpath!(new_path).name
+        return call_fx_path ? self.realpath!(new_path).name : new_path
       end
     rescue ::Net::SFTP::StatusException
       raise Errno::ENOENT

@@ -53,8 +53,8 @@ class File < Rex::Post::IO
 	end
 
 
-  def File.realpath(path)
-    return client.fs.sftp.absolute_path(path)
+  def File.realpath(path, call_fx_realname=true)
+    return client.fs.sftp.absolute_path(path,call_fx_realname)
   end
 
 	#
@@ -164,7 +164,18 @@ class File < Rex::Post::IO
 	#
 	def initialize(name, mode = "r", perms = nil)
     self.client = self.class.client
-		self.filed  = _open(name, mode, perms)
+    begin
+		  self.filed  = _open(name, mode, perms)
+    rescue Net::SFTP::StatusException => e
+      case e.code
+        when Net::SFTP::Constants::StatusCodes::FX_NO_SUCH_FILE
+          raise Errno::ENOENT
+        when Net::SFTP::Constants::StatusCodes::FX_PERMISSION_DENIED
+          raise Errno::EACCES)
+        else
+          raise e
+      end
+    end 
 	end
 
 	##
@@ -259,7 +270,7 @@ protected
 	# Creates a File channel using the supplied information.
 	#
 	def _open(name, mode = "r", perms = nil)
-    return client.fs.sftp.file.open(client.fs.file.realpath(name),mode,perms)
+    return client.fs.sftp.file.open(client.fs.file.realpath(name,false),mode,perms)
 	end
 
 	attr_accessor :client # :nodoc:

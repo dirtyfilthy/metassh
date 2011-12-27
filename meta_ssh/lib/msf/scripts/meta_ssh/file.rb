@@ -22,7 +22,12 @@ module Common
 	end
 
 	def read_file(file_name)
-		fd = session.fs.file.new(file_name, "rb")
+		begin
+      fd = session.fs.file.new(file_name, "rb")
+    rescue Errno::ENOENT => e
+      print_error("Failed to open file.")
+      return nil
+    end
 		data = ''
 		begin
 			until fd.eof?
