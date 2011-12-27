@@ -47,10 +47,10 @@ class MetaSSH < Rex::Post::MetaSSH::Client
 	end
 
 	#
-	# Returns the session type as being 'meterpreter'.
+	# Returns the session type as being 'metaSSH'.
 	#
 	def self.type
-		"ssh"
+		"metaSSH"
 	end
 
 	#
@@ -63,11 +63,11 @@ class MetaSSH < Rex::Post::MetaSSH::Client
 	def shell_init
 		return true if @shell
 
-		# COMSPEC is special-cased on all meterpreters to return a viable
-		# shell.
-		sh = fs.file.expand_path("%COMSPEC%")
-		@shell = sys.process.execute(sh, nil, { "Hidden" => true, "Channelized" => true })
-
+		cmd_exec="/bin/sh -i"
+		@shell = Channel.new(self) {|c| c.channel.exec(cmd_exec)}
+    @shell.type="exec"
+    @shell.info="cmd_exec"
+    return @shell
 	end
 
 	#
@@ -136,15 +136,6 @@ class MetaSSH < Rex::Post::MetaSSH::Client
 
 		buff
 	end
-
-	#
-	# Called by PacketDispatcher to resolve error codes to names.
-	# This is the default version (return the number itself)
-	#
-	def lookup_error(code)
-		"#{code}"
-	end
-
 	##
 	#
 	# Msf::Session overrides
@@ -152,7 +143,7 @@ class MetaSSH < Rex::Post::MetaSSH::Client
 	##
 
 	#
-	# Cleans up the meterpreter client session.
+	# Cleans up the metaSSH client session.
 	#
 	def cleanup
 		cleanup_ssh
@@ -163,7 +154,7 @@ class MetaSSH < Rex::Post::MetaSSH::Client
 	# Returns the session description.
 	#
 	def desc
-		"Ssh"
+		"metaSSH"
 	end
 
 
@@ -174,10 +165,10 @@ class MetaSSH < Rex::Post::MetaSSH::Client
 	##
 
 	#
-	# Runs the meterpreter script in the context of a script container
+	# Runs the metaSSH script in the context of a script container
 	#
 	def execute_file(full_path, args)
-		o = Rex::Script::Meterpreter.new(self, full_path)
+		o = Rex::Script::MetaSSH.new(self, full_path)
 		o.run(args)
 	end
 
@@ -253,36 +244,10 @@ class MetaSSH < Rex::Post::MetaSSH::Client
 	def load_session_info()
 		begin
 			::Timeout.timeout(60) do
-				username  = self.sys.config.getuid
-				sysinfo   = self.sys.config.sysinfo
-
-				safe_info = "#{username} @ #{sysinfo['Computer']}"
-				safe_info.force_encoding("ASCII-8BIT") if safe_info.respond_to?(:force_encoding)
-				# Should probably be using Rex::Text.ascii_safe_hex but leave
-				# this as is for now since "\xNN" is arguably uglier than "_"
-				# showing up in various places in the UI.
-				safe_info.gsub!(/[\x00-\x08\x0b\x0c\x0e-\x19\x7f-\xff]+/n,"_")
-				self.info = safe_info
-
-				# The rest of this requires a database, so bail if it's not
-				# there
-				return if not (framework.db and framework.db.active)
-
-				framework.db.report_note({
-					:type => "host.os.session_fingerprint",
-					:host => self,
-					:workspace => workspace,
-					:data => {
-						:name => sysinfo["Computer"],
-						:os => sysinfo["OS"],
-						:arch => sysinfo["Architecture"],
-					}
-				})
-				if self.db_record
-					self.db_record.desc = safe_info
-					self.db_record.save!
-				end
-			end
+			  
+         #nothing
+        
+      end
 		rescue ::Interrupt
 			raise $!
 		rescue ::Exception => e

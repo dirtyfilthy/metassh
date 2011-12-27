@@ -34,6 +34,10 @@ class Plugin::MetaSSH < Msf::Plugin
   framework.modules.add_module_path(File.join(File.dirname(__FILE__),"meta_ssh","modules"))
   end
 
+  def name
+    "metaSSH"
+  end
+
 end
 
 end
