@@ -167,7 +167,7 @@ Copy meta_ssh.rb & the meta_ssh directory to your metasploit plugins directory
 Usage
 -----
 
-After installation in msfconsole run "load meta\_ssh" to load the plugin. Two new exploit modules and one new payload module will become available. The exploits "multi/ssh/login_password" & "multi/ssh/login_pubkey" both let you login to an ssh server through different means and are fairly self explanatory. The payload for each of these must be "ssh/metassh_session" which will spawn metaSSH. 
+After installation in msfconsole run "load meta_ssh" to load the plugin. Two new exploit modules and one new payload module will become available. The exploits "multi/ssh/login_password" & "multi/ssh/login_pubkey" both let you login to an ssh server through different means and are fairly self explanatory. The payload for each of these must be "ssh/metassh_session" which will spawn metaSSH. 
 
 ### Pivoting
 
