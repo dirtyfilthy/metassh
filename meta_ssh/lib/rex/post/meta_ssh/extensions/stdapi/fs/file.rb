@@ -51,7 +51,10 @@ class File < Rex::Post::IO
 
 		Rex::FileUtils.clean_path($1 || path)
 	end
-
+    
+  def File.stat(path, call_fx_realname=true)
+    return client.fs.filestat.convert(client.fs.sftp.stat!(realpath(path,call_fx_realname)))
+  end
 
   def File.realpath(path, call_fx_realname=true)
     return client.fs.sftp.absolute_path(path,call_fx_realname)
