@@ -52,7 +52,7 @@ class Sftp
         new_path=cwd
         new_path+=client.fs.file.separator unless cwd[-1,1]==client.fs.file.separator
         new_path+=path
-        return call_fx_path ? self.realpath!(new_path).name : new_path
+        return call_fx_realname ? self.realpath!(new_path).name : new_path
       end
     rescue ::Net::SFTP::StatusException
       raise Errno::ENOENT
