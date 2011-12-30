@@ -799,7 +799,7 @@ module Net; module SFTP
       #   sftp.loop
       def loop(&block)
         block ||= Proc.new { pending_requests.any? }
-        session.loop{Rex::ThreadSafe.sleep(0.1); block.call }
+        session.loop{Rex::ThreadSafe.sleep(0.5); block.call }
       end
 
       # Formats, constructs, and sends an SFTP packet of the given type and with
