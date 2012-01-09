@@ -132,10 +132,17 @@ class Channel
       self.client.remove_channel(self)
       self.monitor.kill if self.monitor
       self.thread.kill if self.thread
-      self.channel.close
-      self.lsock.close
-    rescue Exception => e
-      puts e
+      self.channel.close if self.channel
+      self.lsock.close if self.lsock
+      monitor = thread = channel = lsock = nil
+    rescue ::IOError
+      # This happens if we get called in another thread before the lsock gets
+      # set to nil. Doesn't cause any trouble since the channel is closing
+      # anyway, so just ignore.
+    rescue ::Exception => e
+      # Something went wrong but the channel is dead anyway, so just log it and
+      # ignore.
+      elog "Exception while cleaning up channel: #{e.class}: #{e}"
     end
   end
 
