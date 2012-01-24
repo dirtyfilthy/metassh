@@ -65,7 +65,7 @@ class File < Rex::Post::IO
 	#
 	def File.rm(name)
     
-    resp=client.fs.sftp.remove!(File.realpath(name))
+    resp=client.fs.sftp.remove!(client.fs.file.realpath(name))
 		return resp
 	end
 
@@ -73,7 +73,7 @@ class File < Rex::Post::IO
 	# Performs a delete on the specified file.
 	#
 	def File.unlink(name)
-		return File.rm(File.realpath(name))
+		rm(name)
 	end
 
 	#
