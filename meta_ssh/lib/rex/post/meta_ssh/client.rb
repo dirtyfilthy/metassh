@@ -121,7 +121,7 @@ class Client
 		# self.encode_unicode   = opts.has_key?(:encode_unicode) ? opts[:encode_unicode] : true
     self.register_extension_alias('core', ClientCore.new(self))  
     self.core.use('stdapi')
-    self.thread=Thread.new do
+    self.thread=Rex::ThreadFactory.spawn("metaSSHprocessor",false) do
       c=0
       begin
       loop do
