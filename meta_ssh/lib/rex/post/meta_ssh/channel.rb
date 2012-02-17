@@ -39,7 +39,7 @@ class Channel
     self.info=""
     self.client=client
     self.client.add_channel(self)
-    self.thread = Thread.new(client.ssh, cleanup) do |rssh,rcleanup|
+    self.thread = ::Thread.new(client.ssh, cleanup) do |rssh,rcleanup|
 
 			begin
 				info = rssh.transport.socket.getpeername
@@ -89,7 +89,7 @@ class Channel
             yield self
 					end
 
-				self.monitor = Thread.new do
+				self.monitor = ::Thread.new do
 					while(true)
 						next if not self.rsock.has_read_data?(1.0)
 						buff = self.rsock.read(16384)
