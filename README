@@ -169,6 +169,10 @@ Usage
 
 After installation in msfconsole run "load meta_ssh" to load the plugin. Two new exploit modules and one new payload module will become available. The exploits "multi/ssh/login_password" & "multi/ssh/login_pubkey" both let you login to an ssh server through different means and are fairly self explanatory. The payload for each of these must be "ssh/metassh_session" which will spawn metaSSH. 
 
+For ease of use a command is also provided
+
+   open_ssh -l LOGIN -c PASSWORD/KEYFILE HOST
+
 ### Pivoting
 
 To get pivoting to work just add a route to your internal subnet through your metaSSH session like so:
@@ -194,9 +198,9 @@ Forwarded ports (local and remote) are never released until the metaSSH session 
 Acknowledgements
 ----------------
 
-This code is based heavily on the meterpreter session code included with metasploit and has in many cases simply been "cargo culted" and altered.
+This code is based heavily on the meterpreter session code included with metasploit and has in many cases simply been "cargo culted" and altered. Thanks to RageLtMan for his contributions.
 
 Author
 -----
 
-dirtyfilthy -- http://twitter.com/dirtyfilthy -- dirtyfilthee@gmail.com
+dirtyfilthy -- http://github.com/dirtyfilthy -- dirtyfilthee@gmail.com
