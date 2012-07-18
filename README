@@ -17,7 +17,7 @@ Features
 Example
 -------
 
-Here is an example of using metaSSH to pivot through an ssh host at 192.168.56.4 to run psexec on a win2k box at 192.168.57.4, inside the internal subnet. The reverse tcp payload then reverse pivots (automagically) through our ssh box to give us a shell.
+Here is an example of using metaSSH to pivot through an ssh host at 192.168.56.3 to run psexec on a win2k box at 192.168.57.4, inside the internal subnet. The reverse tcp payload then reverse pivots (automagically) through our ssh box to give us a shell.
 
             =[ metasploit v4.2.0-dev [core:4.2 api:1.0]
      + -- --=[ 778 exploits - 415 auxiliary - 121 post
