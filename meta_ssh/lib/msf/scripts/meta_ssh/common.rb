@@ -1,13 +1,13 @@
 
 module Msf
 module Scripts
-module MetaSSH
+module MetaSsh
 module Common
 
   def cmd_exec(cmd,opts=nil,timeout=15)
-    ::Timeout::timeout(timeout) {
-      return session.sys.execute(cmd,opts)
-    }
+ ::Timeout::timeout(timeout) {
+   return session.sys.execute(cmd,opts)
+ }
   end
 
 end

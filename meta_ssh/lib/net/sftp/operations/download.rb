@@ -64,23 +64,23 @@ module Net; module SFTP; module Operations
   # Using a block it's pretty straightforward:
   #
   #   sftp.download!("remote", "local") do |event, downloader, *args|
-  #     case event
-  #     when :open then
-  #       # args[0] : file metadata
-  #       puts "starting download: #{args[0].remote} -> #{args[0].local} (#{args[0].size} bytes}"
-  #     when :get then
-  #       # args[0] : file metadata
-  #       # args[1] : byte offset in remote file
-  #       # args[2] : data that was received
-  #       puts "writing #{args[2].length} bytes to #{args[0].local} starting at #{args[1]}"
-  #     when :close then
-  #       # args[0] : file metadata
-  #       puts "finished with #{args[0].remote}"
-  #     when :mkdir then
-  #       # args[0] : local path name
-  #       puts "creating directory #{args[0]}"
-  #     when :finish then
-  #       puts "all done!"
+  #  case event
+  #  when :open then
+  #    # args[0] : file metadata
+  #    puts "starting download: #{args[0].remote} -> #{args[0].local} (#{args[0].size} bytes}"
+  #  when :get then
+  #    # args[0] : file metadata
+  #    # args[1] : byte offset in remote file
+  #    # args[2] : data that was received
+  #    puts "writing #{args[2].length} bytes to #{args[0].local} starting at #{args[1]}"
+  #  when :close then
+  #    # args[0] : file metadata
+  #    puts "finished with #{args[0].remote}"
+  #  when :mkdir then
+  #    # args[0] : local path name
+  #    puts "creating directory #{args[0]}"
+  #  when :finish then
+  #    puts "all done!"
   #   end
   #
   # However, for more complex implementations (e.g., GUI interfaces and such)
@@ -89,25 +89,25 @@ module Net; module SFTP; module Operations
   # to the downloader:
   #
   #   class CustomHandler
-  #     def on_open(downloader, file)
-  #       puts "starting download: #{file.remote} -> #{file.local} (#{file.size} bytes)"
-  #     end
+  #  def on_open(downloader, file)
+  #    puts "starting download: #{file.remote} -> #{file.local} (#{file.size} bytes)"
+  #  end
   #
-  #     def on_get(downloader, file, offset, data)
-  #       puts "writing #{data.length} bytes to #{file.local} starting at #{offset}"
-  #     end
+  #  def on_get(downloader, file, offset, data)
+  #    puts "writing #{data.length} bytes to #{file.local} starting at #{offset}"
+  #  end
   #
-  #     def on_close(downloader, file)
-  #       puts "finished with #{file.remote}"
-  #     end
+  #  def on_close(downloader, file)
+  #    puts "finished with #{file.remote}"
+  #  end
   #
-  #     def on_mkdir(downloader, path)
-  #       puts "creating directory #{path}"
-  #     end
+  #  def on_mkdir(downloader, path)
+  #    puts "creating directory #{path}"
+  #  end
   #
-  #     def on_finish(downloader)
-  #       puts "all done!"
-  #     end
+  #  def on_finish(downloader)
+  #    puts "all done!"
+  #  end
   #   end
   #
   #   sftp.download!("remote", "local", :progress => CustomHandler.new)
@@ -116,249 +116,249 @@ module Net; module SFTP; module Operations
   # events will be ignored. You can create a catchall method named "call" for
   # those, instead.
   class Download
-    include Net::SSH::Loggable
+ include Net::SSH::Loggable
 
-    # The destination of the download (the name of a file or directory on
-    # the local server, or an IO object)
-    attr_reader :local
+ # The destination of the download (the name of a file or directory on
+ # the local server, or an IO object)
+ attr_reader :local
 
-    # The source of the download (the name of a file or directory on the
-    # remote server)
-    attr_reader :remote
+ # The source of the download (the name of a file or directory on the
+ # remote server)
+ attr_reader :remote
 
-    # The hash of options that was given to this Download instance.
-    attr_reader :options
+ # The hash of options that was given to this Download instance.
+ attr_reader :options
 
-    # The SFTP session instance that drives this download.
-    attr_reader :sftp
+ # The SFTP session instance that drives this download.
+ attr_reader :sftp
 
-    # The properties hash for this object
-    attr_reader :properties
+ # The properties hash for this object
+ attr_reader :properties
 
-    # Instantiates a new downloader process on top of the given SFTP session.
-    # +local+ is either an IO object that should receive the data, or a string
-    # identifying the target file or directory on the local host. +remote+ is
-    # a string identifying the location on the remote host that the download
-    # should source.
-    #
-    # This will return immediately, and requires that the SSH event loop be
-    # run in order to effect the download. (See #wait.)
-    def initialize(sftp, local, remote, options={}, &progress)
-      @sftp = sftp
-      @local = local
-      @remote = remote
-      @progress = progress || options[:progress]
-      @options = options
-      @active = 0
-      @properties = options[:properties] || {}
+ # Instantiates a new downloader process on top of the given SFTP session.
+ # +local+ is either an IO object that should receive the data, or a string
+ # identifying the target file or directory on the local host. +remote+ is
+ # a string identifying the location on the remote host that the download
+ # should source.
+ #
+ # This will return immediately, and requires that the SSH event loop be
+ # run in order to effect the download. (See #wait.)
+ def initialize(sftp, local, remote, options={}, &progress)
+   @sftp = sftp
+   @local = local
+   @remote = remote
+   @progress = progress || options[:progress]
+   @options = options
+   @active = 0
+   @properties = options[:properties] || {}
 
-      self.logger = sftp.logger
+   self.logger = sftp.logger
 
-      if recursive? && local.respond_to?(:write)
-        raise ArgumentError, "cannot download a directory tree in-memory"
-      end
+   if recursive? && local.respond_to?(:write)
+  raise ArgumentError, "cannot download a directory tree in-memory"
+   end
 
-      @stack = [Entry.new(remote, local, recursive?)]
-      process_next_entry
+   @stack = [Entry.new(remote, local, recursive?)]
+   process_next_entry
+ end
+
+ # Returns the value of the :recursive key in the options hash that was
+ # given when the object was instantiated.
+ def recursive?
+   options[:recursive]
+ end
+
+ # Returns true if there are any active requests or pending files or
+ # directories.
+ def active?
+   @active > 0 || stack.any?
+ end
+
+ # Forces the transfer to stop.
+ def abort!
+   @active = 0
+   @stack.clear
+ end
+
+ # Runs the SSH event loop for as long as the downloader is active (see
+ # #active?). This can be used to block until the download completes.
+ def wait
+   sftp.loop { active? }
+   self
+ end
+
+ # Returns the property with the given name. This allows Download instances
+ # to store their own state when used as part of a state machine.
+ def [](name)
+   @properties[name.to_sym]
+ end
+
+ # Sets the given property to the given name. This allows Download instances
+ # to store their own state when used as part of a state machine.
+ def []=(name, value)
+   @properties[name.to_sym] = value
+ end
+
+ private
+
+   # A simple struct for encapsulating information about a single remote
+   # file or directory that needs to be downloaded.
+   Entry = Struct.new(:remote, :local, :directory, :size, :handle, :offset, :sink)
+
+   #--
+   # "ruby -w" hates private attributes, so we have to do these longhand
+   #++
+
+   # The stack of Entry instances, indicating which files and directories
+   # on the remote host remain to be downloaded.
+   def stack; @stack; end
+
+   # The progress handler for this instance. Possibly nil.
+   def progress; @progress; end
+
+   # The default read size.
+   DEFAULT_READ_SIZE = 32_000
+
+   # The number of bytes to read at a time from remote files.
+   def read_size
+  options[:read_size] || DEFAULT_READ_SIZE
+   end
+
+   # The number of simultaneou SFTP requests to use to effect the download.
+   # Defaults to 16 for recursive downloads.
+   def requests
+  options[:requests] || (recursive? ? 16 : 2)
+   end
+
+   # Enqueues as many files and directories from the stack as possible
+   # (see #requests).
+   def process_next_entry
+  while stack.any? && requests > @active
+    entry = stack.shift
+    @active += 1
+
+    if entry.directory
+   update_progress(:mkdir, entry.local)
+   ::Dir.mkdir(entry.local) unless ::File.directory?(entry.local)
+   request = sftp.opendir(entry.remote, &method(:on_opendir))
+   request[:entry] = entry
+    else
+   open_file(entry)
+    end
+  end
+
+  update_progress(:finish) if !active?
+   end
+
+   # Called when a remote directory is "opened" for reading, e.g. to
+   # enumerate its contents. Starts an readdir operation if the opendir
+   # operation was successful.
+   def on_opendir(response)
+  entry = response.request[:entry]
+  raise "opendir #{entry.remote}: #{response}" unless response.ok?
+  entry.handle = response[:handle]
+  request = sftp.readdir(response[:handle], &method(:on_readdir))
+  request[:parent] = entry
+   end
+
+   # Called when the next batch of items is read from a directory on the
+   # remote server. If any items were read, they are added to the queue
+   # and #process_next_entry is called.
+   def on_readdir(response)
+  entry = response.request[:parent]
+  if response.eof?
+    request = sftp.close(entry.handle, &method(:on_closedir))
+    request[:parent] = entry
+  elsif !response.ok?
+    raise "readdir #{entry.remote}: #{response}"
+  else
+    response[:names].each do |item|
+   next if item.name == "." || item.name == ".."
+   stack << Entry.new(::File.join(entry.remote, item.name), ::File.join(entry.local, item.name), item.directory?, item.attributes.size)
     end
 
-    # Returns the value of the :recursive key in the options hash that was
-    # given when the object was instantiated.
-    def recursive?
-      options[:recursive]
-    end
+    # take this opportunity to enqueue more requests
+    process_next_entry
 
-    # Returns true if there are any active requests or pending files or
-    # directories.
-    def active?
-      @active > 0 || stack.any?
-    end
+    request = sftp.readdir(entry.handle, &method(:on_readdir))
+    request[:parent] = entry
+  end
+   end
 
-    # Forces the transfer to stop.
-    def abort!
-      @active = 0
-      @stack.clear
-    end
+   # Called when a file is to be opened for reading from the remote server.
+   def open_file(entry)
+  update_progress(:open, entry)
+  request = sftp.open(entry.remote, &method(:on_open))
+  request[:entry] = entry
+   end
 
-    # Runs the SSH event loop for as long as the downloader is active (see
-    # #active?). This can be used to block until the download completes.
-    def wait
-      sftp.loop { active? }
-      self
-    end
+   # Called when a directory handle is closed.
+   def on_closedir(response)
+  @active -= 1
+  entry = response.request[:parent]
+  raise "close #{entry.remote}: #{response}" unless response.ok?
+  process_next_entry
+   end
 
-    # Returns the property with the given name. This allows Download instances
-    # to store their own state when used as part of a state machine.
-    def [](name)
-      @properties[name.to_sym]
-    end
+   # Called when a file has been opened. This will call #download_next_chunk
+   # to initiate the data transfer.
+   def on_open(response)
+  entry = response.request[:entry]
+  raise "open #{entry.remote}: #{response}" unless response.ok?
 
-    # Sets the given property to the given name. This allows Download instances
-    # to store their own state when used as part of a state machine.
-    def []=(name, value)
-      @properties[name.to_sym] = value
-    end
+  entry.handle = response[:handle]
+  entry.sink = entry.local.respond_to?(:write) ? entry.local : ::File.open(entry.local, "wb")
+  entry.offset = 0
 
-    private
+  download_next_chunk(entry)
+   end
 
-      # A simple struct for encapsulating information about a single remote
-      # file or directory that needs to be downloaded.
-      Entry = Struct.new(:remote, :local, :directory, :size, :handle, :offset, :sink)
+   # Initiates a read of the next #read_size bytes from the file.
+   def download_next_chunk(entry)
+  request = sftp.read(entry.handle, entry.offset, read_size, &method(:on_read))
+  request[:entry] = entry
+  request[:offset] = entry.offset
+  entry.offset += read_size
+   end
 
-      #--
-      # "ruby -w" hates private attributes, so we have to do these longhand
-      #++
+   # Called when a read from a file finishes. If the read was successful
+   # and returned data, this will call #download_next_chunk to read the
+   # next bit from the file. Otherwise the file will be closed.
+   def on_read(response)
+  entry = response.request[:entry]
 
-      # The stack of Entry instances, indicating which files and directories
-      # on the remote host remain to be downloaded.
-      def stack; @stack; end
+  if response.eof?
+    update_progress(:close, entry)
+    entry.sink.close
+    request = sftp.close(entry.handle, &method(:on_close))
+    request[:entry] = entry
+  elsif !response.ok?
+    raise "read #{entry.remote}: #{response}"
+  else
+    update_progress(:get, entry, response.request[:offset], response[:data])
+    entry.sink.write(response[:data])
+    download_next_chunk(entry)
+  end
+   end
 
-      # The progress handler for this instance. Possibly nil.
-      def progress; @progress; end
+   # Called when a file handle is closed.
+   def on_close(response)
+  @active -= 1
+  entry = response.request[:entry]
+  raise "close #{entry.remote}: #{response}" unless response.ok?
+  process_next_entry
+   end
 
-      # The default read size.
-      DEFAULT_READ_SIZE = 32_000
-
-      # The number of bytes to read at a time from remote files.
-      def read_size
-        options[:read_size] || DEFAULT_READ_SIZE
-      end
-
-      # The number of simultaneou SFTP requests to use to effect the download.
-      # Defaults to 16 for recursive downloads.
-      def requests
-        options[:requests] || (recursive? ? 16 : 2)
-      end
-
-      # Enqueues as many files and directories from the stack as possible
-      # (see #requests).
-      def process_next_entry
-        while stack.any? && requests > @active
-          entry = stack.shift
-          @active += 1
-
-          if entry.directory
-            update_progress(:mkdir, entry.local)
-            ::Dir.mkdir(entry.local) unless ::File.directory?(entry.local)
-            request = sftp.opendir(entry.remote, &method(:on_opendir))
-            request[:entry] = entry
-          else
-            open_file(entry)
-          end
-        end
-
-        update_progress(:finish) if !active?
-      end
-
-      # Called when a remote directory is "opened" for reading, e.g. to
-      # enumerate its contents. Starts an readdir operation if the opendir
-      # operation was successful.
-      def on_opendir(response)
-        entry = response.request[:entry]
-        raise "opendir #{entry.remote}: #{response}" unless response.ok?
-        entry.handle = response[:handle]
-        request = sftp.readdir(response[:handle], &method(:on_readdir))
-        request[:parent] = entry
-      end
-
-      # Called when the next batch of items is read from a directory on the
-      # remote server. If any items were read, they are added to the queue
-      # and #process_next_entry is called.
-      def on_readdir(response)
-        entry = response.request[:parent]
-        if response.eof?
-          request = sftp.close(entry.handle, &method(:on_closedir))
-          request[:parent] = entry
-        elsif !response.ok?
-          raise "readdir #{entry.remote}: #{response}"
-        else
-          response[:names].each do |item|
-            next if item.name == "." || item.name == ".."
-            stack << Entry.new(::File.join(entry.remote, item.name), ::File.join(entry.local, item.name), item.directory?, item.attributes.size)
-          end
-
-          # take this opportunity to enqueue more requests
-          process_next_entry
-
-          request = sftp.readdir(entry.handle, &method(:on_readdir))
-          request[:parent] = entry
-        end
-      end
-
-      # Called when a file is to be opened for reading from the remote server.
-      def open_file(entry)
-        update_progress(:open, entry)
-        request = sftp.open(entry.remote, &method(:on_open))
-        request[:entry] = entry
-      end
-
-      # Called when a directory handle is closed.
-      def on_closedir(response)
-        @active -= 1
-        entry = response.request[:parent]
-        raise "close #{entry.remote}: #{response}" unless response.ok?
-        process_next_entry
-      end
-
-      # Called when a file has been opened. This will call #download_next_chunk
-      # to initiate the data transfer.
-      def on_open(response)
-        entry = response.request[:entry]
-        raise "open #{entry.remote}: #{response}" unless response.ok?
-
-        entry.handle = response[:handle]
-        entry.sink = entry.local.respond_to?(:write) ? entry.local : ::File.open(entry.local, "wb")
-        entry.offset = 0
-
-        download_next_chunk(entry)
-      end
-
-      # Initiates a read of the next #read_size bytes from the file.
-      def download_next_chunk(entry)
-        request = sftp.read(entry.handle, entry.offset, read_size, &method(:on_read))
-        request[:entry] = entry
-        request[:offset] = entry.offset
-        entry.offset += read_size
-      end
-
-      # Called when a read from a file finishes. If the read was successful
-      # and returned data, this will call #download_next_chunk to read the
-      # next bit from the file. Otherwise the file will be closed.
-      def on_read(response)
-        entry = response.request[:entry]
-
-        if response.eof?
-          update_progress(:close, entry)
-          entry.sink.close
-          request = sftp.close(entry.handle, &method(:on_close))
-          request[:entry] = entry
-        elsif !response.ok?
-          raise "read #{entry.remote}: #{response}"
-        else
-          update_progress(:get, entry, response.request[:offset], response[:data])
-          entry.sink.write(response[:data])
-          download_next_chunk(entry)
-        end
-      end
-
-      # Called when a file handle is closed.
-      def on_close(response)
-        @active -= 1
-        entry = response.request[:entry]
-        raise "close #{entry.remote}: #{response}" unless response.ok?
-        process_next_entry
-      end
-
-      # If a progress callback or object has been set, this will report
-      # the progress to that callback or object.
-      def update_progress(hook, *args)
-        on = "on_#{hook}"
-        if progress.respond_to?(on)
-          progress.send(on, self, *args)
-        elsif progress.respond_to?(:call)
-          progress.call(hook, self, *args)
-        end
-      end
+   # If a progress callback or object has been set, this will report
+   # the progress to that callback or object.
+   def update_progress(hook, *args)
+  on = "on_#{hook}"
+  if progress.respond_to?(on)
+    progress.send(on, self, *args)
+  elsif progress.respond_to?(:call)
+    progress.call(hook, self, *args)
+  end
+   end
   end
 
 end; end; end

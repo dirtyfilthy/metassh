@@ -12,19 +12,19 @@ module Net; module SFTP; module Protocol; module V02
   # see Net::SFTP::Session for the recommended interface.
   class Base < V01::Base
 
-    # Returns the protocol version implemented by this driver. (2, in this
-    # case)
-    def version
-      2
-    end
+ # Returns the protocol version implemented by this driver. (2, in this
+ # case)
+ def version
+   2
+ end
 
-    # Sends a FXP_RENAME packet to the server to request that the file or
-    # directory with the given +name+ (must be a full path) be changed to
-    # +new_name+ (which must also be a path). The +flags+ parameter is
-    # ignored in this version of the protocol.
-    def rename(name, new_name, flags=nil)
-      send_request(FXP_RENAME, :string, name, :string, new_name)
-    end
+ # Sends a FXP_RENAME packet to the server to request that the file or
+ # directory with the given +name+ (must be a full path) be changed to
+ # +new_name+ (which must also be a path). The +flags+ parameter is
+ # ignored in this version of the protocol.
+ def rename(name, new_name, flags=nil)
+   send_request(FXP_RENAME, :string, name, :string, new_name)
+ end
 
   end
 

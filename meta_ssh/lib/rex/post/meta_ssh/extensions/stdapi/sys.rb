@@ -8,7 +8,7 @@ require 'rex/logging'
 
 module Rex
 module Post
-module MetaSSH
+module MetaSsh
 module Extensions
 module Stdapi
 
@@ -25,15 +25,15 @@ class Sys
 public
 
   def initialize(client)
-    self.client=client
+ self.client=client
   end
 
-  def exec(cmd,args=[])
+  def exec(cmd, args=[])
     args=[] if args.nil?
     full_cmd="#{cmd} #{args.map{|a| "\"#{a}\""}.join(' ')}"
     out=""
     chan=self.client.ssh.exec(full_cmd) do |ch, stream, data|
-      out+=data
+      out += data
     end
     loop do
       Rex::ThreadSafe.sleep(0.2)
@@ -46,7 +46,7 @@ public
 
 protected
 
-	attr_accessor :client # :nodoc:
+  attr_accessor :client # :nodoc:
 
 end
 

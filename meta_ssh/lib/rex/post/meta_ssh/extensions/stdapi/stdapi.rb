@@ -11,7 +11,7 @@ require 'rex/post/meta_ssh/extensions/stdapi/sys'
 
 module Rex
 module Post
-module MetaSSH
+module MetaSsh
 module Extensions
 module Stdapi
 
@@ -24,64 +24,61 @@ module Stdapi
 ###
 class Stdapi < Extension
 
-	#
-	# Initializes an instance of the standard API extension.
-	#
-	def initialize(client)
-		super(client, 'stdapi')
+  #
+  # Initializes an instance of the standard API extension.
+  #
+  def initialize(client)
+    super(client, 'stdapi')
 
-		# Alias the following things on the client object so that they
-		# can be directly referenced
-		client.register_extension_aliases(
-			[
-				{
-					'name' => 'net',
-					'ext'  => ObjectAliases.new(
-						{
-							'socket'   => Rex::Post::MetaSSH::Extensions::Stdapi::Net::Socket.new(client)
-						})
-				},
-
-				{
-					'name' => 'fs',
-					'ext'  => ObjectAliases.new(
-						{
-							'sftp'      => Rex::Post::MetaSSH::Extensions::Stdapi::Fs::Sftp.new(client),
-              'file'      => self.file,
-              'filestat'  => self.file_stat,
-              'dir'       => self.dir
-						})
-				},
-
-        { 'name' => 'sys',
-          'ext'  => Rex::Post::MetaSSH::Extensions::Stdapi::Sys.new(client)
+    # Alias the following things on the client object so that they
+    # can be directly referenced
+    client.register_extension_aliases(
+      [
+        {
+          'name' => 'net',
+          'ext'  => ObjectAliases.new({
+            'socket'   => Rex::Post::MetaSsh::Extensions::Stdapi::Net::Socket.new(client)
+          })
+        },
+        {
+          'name' => 'fs',
+          'ext'  => ObjectAliases.new({
+            'sftp'   => Rex::Post::MetaSsh::Extensions::Stdapi::Fs::Sftp.new(client),
+            'file'   => self.file,
+            'filestat'  => self.file_stat,
+            'dir'    => self.dir
+          })
+        },
+        { 
+          'name' => 'sys',
+          'ext'  => Rex::Post::MetaSsh::Extensions::Stdapi::Sys.new(client)
         },
 
-			])
-	end
+      ])
+  end
 
   def file
-    return brand(Rex::Post::MetaSSH::Extensions::Stdapi::Fs::File)
+    return brand(Rex::Post::MetaSsh::Extensions::Stdapi::Fs::File)
   end
 
 
   def dir
-    return brand(Rex::Post::MetaSSH::Extensions::Stdapi::Fs::Dir)
+    return brand(Rex::Post::MetaSsh::Extensions::Stdapi::Fs::Dir)
   end
 
 
   def file_stat
-    return brand(Rex::Post::MetaSSH::Extensions::Stdapi::Fs::FileStat)
+    return brand(Rex::Post::MetaSsh::Extensions::Stdapi::Fs::FileStat)
   end
 
-	#
-	# Sets the client instance on a duplicated copy of the supplied class.
-	#
-	def brand(klass)
-		klass = klass.dup
-		klass.client = self.client
-		return klass
-	end
+  #
+  # Sets the client instance on a duplicated copy of the supplied class.
+  #
+  def brand(klass)
+    klass = klass.dup
+    klass.client = self.client
+    return klass
+  end
 
 
 
