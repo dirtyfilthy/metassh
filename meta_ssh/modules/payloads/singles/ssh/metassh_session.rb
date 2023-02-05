@@ -14,27 +14,30 @@ require 'msf/core/handler/meta_ssh'
 require 'msf/base/sessions/meta_ssh'
 
 
-module Metasploit3
-	include Msf::Payload::Single
+module MetasploitModule
+  include Msf::Payload::Single
 
-	def initialize(info = {})
-		super(update_info(info,
-			'Name'          => 'metaSSH Session',
-			'Version'       => '$Revision$',
-			'Description'   => 'Spawn an metaSSH session',
-			'PayloadType'   => 'ssh',
-      'ConnectionType' => 'ssh',
-      'Author'        => ['alhazred'],
-			'Platform'      => 'ssh',
-			'Arch'          => ARCH_SSH,
-			'License'       => MSF_LICENSE,
-			'Handler'       => Msf::Handler::MetaSSH,
-      'Payload'       => {
-                 'Offsets' => { },
-                 'Payload' => ''
+  def initialize(info = {})
+    super(update_info(info,
+      'Name'           => 'MetaSsh Session',
+      'Description'    => 'Spawn a MetaSsh session',
+      'PayloadType'    => 'ssh',
+      'ConnectionType' => 'tunnel',
+      'Author'         => [
+        'alhazred',
+        'rageltman <rageltman [at] sempervictus>'
+      ],
+      # 'Platform'       => 'ssh',
+      'Platform'   => %w[linux osx unix python bsd],
+      'Arch'           => ARCH_SSH,
+      'License'        => MSF_LICENSE,
+      'Handler'        => Msf::Handler::MetaSsh,
+      'Payload'        => {
+        'Offsets'  => { },
+        'Payload'  => ''
       },
-			'Session'       => Msf::Sessions::MetaSSH))
-	end
+      'Session'    => Msf::Sessions::MetaSsh))
+  end
 
 end
 

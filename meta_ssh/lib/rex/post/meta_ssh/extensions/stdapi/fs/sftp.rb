@@ -1,10 +1,10 @@
-#!/usr/bin/env ruby
+    #!/usr/bin/env ruby
 
 require 'net/sftp'
 
 module Rex
 module Post
-module MetaSSH
+module MetaSsh
 module Extensions
 module Stdapi
 module Fs
@@ -49,13 +49,13 @@ class Sftp
       if absolute_path?(path) 
         return call_fx_realname ? self.realpath!(path).name : path
       else
-        new_path=cwd
-        new_path+=client.fs.file.separator unless cwd[-1,1]==client.fs.file.separator
-        new_path+=path
-        return call_fx_realname ? self.realpath!(new_path).name : new_path
+       new_path=cwd
+       new_path+=client.fs.file.separator unless cwd[-1,1]==client.fs.file.separator
+       new_path+=path
+       return call_fx_realname ? self.realpath!(new_path).name : new_path
       end
     rescue ::Net::SFTP::StatusException
-      raise Errno::ENOENT
+     raise Errno::ENOENT
     end
   end
 
@@ -68,7 +68,7 @@ class Sftp
       raise Errno::ENOTDIR 
     end 
     raise Errno::ENOTDIR unless s.directory?
-    @cwd=absolute_path(dir) 
+    @cwd = absolute_path(dir) 
   end
 
   def method_missing(method, *args, &block)

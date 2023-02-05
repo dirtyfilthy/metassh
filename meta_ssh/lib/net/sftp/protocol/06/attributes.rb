@@ -39,69 +39,69 @@ module Net; module SFTP; module Protocol; module V06
   # above attributes are exposed as methods (though not all will be set with
   # non-nil values from the server).
   class Attributes < V04::Attributes
-    F_BITS              = 0x00000200
-    F_ALLOCATION_SIZE   = 0x00000400
-    F_TEXT_HINT         = 0x00000800
-    F_MIME_TYPE         = 0x00001000
-    F_LINK_COUNT        = 0x00002000
-    F_UNTRANSLATED_NAME = 0x00004000
-    F_CTIME             = 0x00008000
+ F_BITS     = 0x00000200
+ F_ALLOCATION_SIZE   = 0x00000400
+ F_TEXT_HINT   = 0x00000800
+ F_MIME_TYPE   = 0x00001000
+ F_LINK_COUNT  = 0x00002000
+ F_UNTRANSLATED_NAME = 0x00004000
+ F_CTIME    = 0x00008000
 
-    # The array of elements that describe this structure, in order. Used when
-    # parsing and serializing attribute objects.
-    def self.elements #:nodoc:
-      @elements ||= [
-        [:type,                :byte,    0],
-        [:size,                :int64,   F_SIZE],
-        [:allocation_size,     :int64,   F_ALLOCATION_SIZE],
-        [:owner,               :string,  F_OWNERGROUP],
-        [:group,               :string,  F_OWNERGROUP],
-        [:permissions,         :long,    F_PERMISSIONS],
-        [:atime,               :int64,   F_ACCESSTIME],
-        [:atime_nseconds,      :long,    F_ACCESSTIME | F_SUBSECOND_TIMES],
-        [:createtime,          :int64,   F_CREATETIME],
-        [:createtime_nseconds, :long,    F_CREATETIME | F_SUBSECOND_TIMES],
-        [:mtime,               :int64,   F_MODIFYTIME],
-        [:mtime_nseconds,      :long,    F_MODIFYTIME | F_SUBSECOND_TIMES],
-        [:ctime,               :int64,   F_CTIME],
-        [:ctime_nseconds,      :long,    F_CTIME | F_SUBSECOND_TIMES],
-        [:acl,                 :special, F_ACL],
-        [:attrib_bits,         :long,    F_BITS],
-        [:attrib_bits_valid,   :long,    F_BITS],
-        [:text_hint,           :byte,    F_TEXT_HINT],
-        [:mime_type,           :string,  F_MIME_TYPE],
-        [:link_count,          :long,    F_LINK_COUNT],
-        [:untranslated_name,   :string,  F_UNTRANSLATED_NAME],
-        [:extended,            :special, F_EXTENDED]
-      ]
-    end
+ # The array of elements that describe this structure, in order. Used when
+ # parsing and serializing attribute objects.
+ def self.elements #:nodoc:
+   @elements ||= [
+  [:type,    :byte, 0],
+  [:size,    :int64,   F_SIZE],
+  [:allocation_size,  :int64,   F_ALLOCATION_SIZE],
+  [:owner,      :string,  F_OWNERGROUP],
+  [:group,      :string,  F_OWNERGROUP],
+  [:permissions,   :long, F_PERMISSIONS],
+  [:atime,      :int64,   F_ACCESSTIME],
+  [:atime_nseconds,   :long, F_ACCESSTIME | F_SUBSECOND_TIMES],
+  [:createtime,    :int64,   F_CREATETIME],
+  [:createtime_nseconds, :long, F_CREATETIME | F_SUBSECOND_TIMES],
+  [:mtime,      :int64,   F_MODIFYTIME],
+  [:mtime_nseconds,   :long, F_MODIFYTIME | F_SUBSECOND_TIMES],
+  [:ctime,      :int64,   F_CTIME],
+  [:ctime_nseconds,   :long, F_CTIME | F_SUBSECOND_TIMES],
+  [:acl,     :special, F_ACL],
+  [:attrib_bits,   :long, F_BITS],
+  [:attrib_bits_valid,   :long, F_BITS],
+  [:text_hint,     :byte, F_TEXT_HINT],
+  [:mime_type,     :string,  F_MIME_TYPE],
+  [:link_count,    :long, F_LINK_COUNT],
+  [:untranslated_name,   :string,  F_UNTRANSLATED_NAME],
+  [:extended,   :special, F_EXTENDED]
+   ]
+ end
 
-    # The size on-disk of the file
-    attr_accessor :allocation_size
+ # The size on-disk of the file
+ attr_accessor :allocation_size
 
-    # The time at which the file's attributes were last changed
-    attr_accessor :ctime
+ # The time at which the file's attributes were last changed
+ attr_accessor :ctime
 
-    # The nanosecond component of #ctime
-    attr_accessor :ctime_nseconds
+ # The nanosecond component of #ctime
+ attr_accessor :ctime_nseconds
 
-    # Other attributes of this file or directory (as a bit field)
-    attr_accessor :attrib_bits
+ # Other attributes of this file or directory (as a bit field)
+ attr_accessor :attrib_bits
 
-    # A bit mask describing which bits in #attrib_bits are valid
-    attr_accessor :attrib_bits_valid
+ # A bit mask describing which bits in #attrib_bits are valid
+ attr_accessor :attrib_bits_valid
 
-    # Describes whether the file may or may not contain textual data
-    attr_accessor :text_hint
+ # Describes whether the file may or may not contain textual data
+ attr_accessor :text_hint
 
-    # The mime-type of the file
-    attr_accessor :mime_type
+ # The mime-type of the file
+ attr_accessor :mime_type
 
-    # The hard link count for the file
-    attr_accessor :link_count
+ # The hard link count for the file
+ attr_accessor :link_count
 
-    # The value of the file name before filename translation was attempted
-    attr_accessor :untranslated_name
+ # The value of the file name before filename translation was attempted
+ attr_accessor :untranslated_name
   end
 
 end; end; end; end

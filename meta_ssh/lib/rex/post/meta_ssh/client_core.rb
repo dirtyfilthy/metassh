@@ -4,7 +4,7 @@ require 'rex/post/meta_ssh/extension'
 
 module Rex
 module Post
-module MetaSSH
+module MetaSsh
 
 ###
 #
@@ -16,19 +16,19 @@ module MetaSSH
 ###
 class ClientCore < Extension
 
-	#
-	# Initializes the 'core' portion of the meterpreter client commands.
-	#
-	def initialize(client)
-		super(client, "core")
-	end
+  #
+  # Initializes the 'core' portion of the meterpreter client commands.
+  #
+  def initialize(client)
+    super(client, "core")
+  end
 
-	##
-	#
-	# Core commands
-	#
-	##
-	def shutdown
+  ##
+  #
+  # Core commands
+  #
+  ##
+  def shutdown
     true
   end
 

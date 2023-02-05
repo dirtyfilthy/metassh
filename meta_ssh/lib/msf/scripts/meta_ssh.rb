@@ -4,7 +4,7 @@ require 'msf/scripts/meta_ssh/accounts'
 
 module Msf
 module Scripts
-module MetaSSH
+module MetaSsh
 
 
 

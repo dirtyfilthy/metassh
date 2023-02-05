@@ -3,7 +3,7 @@ require 'msf/core/post/linux/priv'
 
 module Msf
 module Scripts
-module MetaSSH
+module MetaSsh
 module Common
 
 include ::Msf::Post::Linux::System
